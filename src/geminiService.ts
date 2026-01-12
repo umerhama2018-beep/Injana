@@ -1,11 +1,20 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 
 const API_KEY = "AIzaSyCjnAeqoceIepwGY-5CuC55zXCwrzgFSEY";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export async function analyzePlantImage(base64Image: string, lang: string) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+      ],
+    });
+
     const imageData = base64Image.includes(",") ? base64Image.split(",")[1] : base64Image;
 
     const month = new Date().getMonth();
@@ -21,23 +30,10 @@ export async function analyzePlantImage(base64Image: string, lang: string) {
       ٣- چارەسەر بە خاڵبەندی.
       ٤- ڕێنمایی ئاڵتونی بۆ ئەم وەرزی ئێستایە (${season}).
       وەڵامەکان بە کوردیی سۆرانی بن.`,
-      ku_km: `Tu pisporê riwekan î. Bi vî rengî bersiv bide:
-      1- Navê riwekê.
-      2- Nexweşî û pirsgirêk.
-      3- Çareserî.
-      4- Şîreta zêrîn ji bo vê demsalê (${season}).
-      Bi Kurmancî bersiv bide.`,
-      ar: `أنت خبير نباتات. أجب بالتنسيق التالي:
-      1- اسم النبات.
-      2- المشكلة أو المرض.
-      3- الحلول المقترحة.
-      4- نصيحة ذهبية لهذا الموسم (${season}).
-      باللغة العربية.`,
-      en: `You are a plant expert. Respond in this format:
-      1- Plant Name.
-      2- Disease or Problem.
-      3- Treatment steps.
-      4- Golden advice for current season (${season}).`
+      // ... (باقی زمانەکان وەک خۆی)
+      ku_km: `Navê riwekê, Nexweşî, Çareserî û Şîreta zêrîn ji bo (${season}) bi Kurmancî.`,
+      ar: `اسم النبات، المرض، الحل، ونصيحة ذهبية لموسم (${season}) بالعربية.`,
+      en: `Plant Name, Disease, Treatment, and Golden advice for (${season}) in English.`
     };
 
     const result = await model.generateContent([
@@ -45,9 +41,14 @@ export async function analyzePlantImage(base64Image: string, lang: string) {
       { inlineData: { data: imageData, mimeType: "image/jpeg" } },
     ]);
     
-    return result.response.text();
+    const response = await result.response;
+    return response.text();
   } catch (error: any) {
-    console.error("Gemini Error:", error);
-    throw new Error(error.message || "Error");
+    // لێرەدا هەڵە ڕاستەقینەکە دەردەخەین بۆ دۆزینەوەی کێشەکە
+    console.error("Detailed Gemini Error:", error);
+    if (error.message?.includes("API_KEY_INVALID")) return "کلیلەکە (API Key) کار ناکات یان هەڵەیە.";
+    if (error.message?.includes("403")) return "گوگل ڕێگری لەم کلیلە دەکات. دڵنیابەرەوە لە ڕێکخستنی کلیلەکە.";
+    if (error.message?.includes("location")) return "ببورە، ئەم خزمەتگوزارییەی گوگل لەم ناوچەیە کار ناکات بەبێ VPN.";
+    throw new Error(error.message || "کێشەیەک لە پەیوەندی دروست بوو");
   }
 }
