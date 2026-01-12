@@ -5,8 +5,8 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 
 export async function analyzePlantImage(base64Image: string, lang: string) {
   try {
-    // گۆڕینی ناوی مۆدێل بۆ وەشانی جێگیر
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // گۆڕینی ناوەکە بۆ وەشانی نوێ و جێگیر
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     
     const imageData = base64Image.includes(",") ? base64Image.split(",")[1] : base64Image;
 
@@ -17,26 +17,27 @@ export async function analyzePlantImage(base64Image: string, lang: string) {
     else if (month >= 8 && month <= 10) season = "Autumn";
 
     const prompts: any = {
-      ku_so: `تۆ پسپۆڕی ڕووەکیت. وێنەکە بپشکنە و بەم شێوەیە بە کوردیی سۆرانی وەڵام بدەرەوە:
-      ١- ناوی ڕووەکەکە.
-      ٢- کێشە و نەخۆشییەکەی.
-      ٣- چارەسەر بە خاڵبەندی.
-      ٤- ڕێنمایی ئاڵتونی بۆ ئەم وەرزی ئێستایە (${season}).`,
-      ku_km: `Navê riwekê, nexweşî û çareserî bi Kurmancî ji bo demsala (${season}).`,
-      ar: `اسم النبات، المرض، والحل باللغة العربية لموسم (${season}).`,
-      en: `Plant name, disease, and treatment for (${season}) season in English.`
+      ku_so: `تۆ پسپۆڕی ڕووەکیت. بە کوردیی سۆرانی وەڵام بدەرەوە: ١- ناوی ڕووەک. ٢- نەخۆشی. ٣- چارەسەر. ٤- ڕێنمایی بۆ وەرزی (${season}).`,
+      ku_km: `Bi Kurmancî bersiv bide: Navê riwekê, nexweşî, çareserî û şîreta (${season}).`,
+      ar: `أجب بالعربية: اسم النبات، المرض، الحل، ونصيحة لموسم (${season}).`,
+      en: `Respond in English: Plant name, disease, treatment, and advice for (${season}).`
     };
 
+    // ناردنی داتا بە شێوەیەکی سادەتر بۆ ئەوەی هەڵە نەدات
     const result = await model.generateContent([
-      { text: prompts[lang] || prompts['en'] },
-      { inlineData: { data: imageData, mimeType: "image/jpeg" } },
+      prompts[lang] || prompts['en'],
+      {
+        inlineData: {
+          data: imageData,
+          mimeType: "image/jpeg"
+        }
+      }
     ]);
     
     const response = await result.response;
     return response.text();
   } catch (error: any) {
-    console.error("Error Detail:", error);
-    // ئەگەر کێشەی 404 مابوو، دەقی هەڵەکە ڕوونتر دەکەینەوە
-    return "سەرچاوەی هەڵە: " + (error.message || "کێشەیەک لە دۆزینەوەی مۆدێل هەیە");
+    console.error(error);
+    return "هەڵە لە مۆدێل: " + (error.message || "404");
   }
 }
