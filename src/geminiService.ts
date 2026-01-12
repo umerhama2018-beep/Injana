@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI("کلیلەکەی_خۆت_لێرە_دابنێ");
+const genAI = new GoogleGenerativeAI("
+gen-lang-client-0809921482");
 
 export async function analyzePlantImage(base64Image: string, lang: string) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
