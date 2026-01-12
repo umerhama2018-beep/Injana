@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Camera, Loader2, RefreshCw, Home } from 'lucide-react';
+import { Camera, Loader2, Home, ShoppingBag, Megaphone } from 'lucide-react';
 import { analyzePlantImage } from './geminiService';
 
 const translations: any = {
-  ku_so: { title: "ئینجانە", subtitle: "پزیشکی ڕووەکەکانت", btn: "وێنە بگرە", loading: "خەریکی پشکنینە...", result: "ئەنجامی پشکنین", reset: "گەڕانەوە بۆ سەرەتا", direction: 'rtl' },
-  ku_km: { title: "Injana", subtitle: "Bijîşkê riwekên te", btn: "Wêne bikişîne", loading: "Kontrol dike...", result: "Encama kontrolê", reset: "Vegere serê", direction: 'rtl' },
-  ar: { title: "إنـجـانـة", subtitle: "طبيب نباتاتك الشخصي", btn: "التقط صورة", loading: "جاري الفحص...", result: "نتيجة الفحص", reset: "العودة للرئيسية", direction: 'rtl' },
-  en: { title: "Injana", subtitle: "Your Plant Doctor", btn: "Take a Photo", loading: "Analyzing...", result: "Result", reset: "Start Over", direction: 'ltr' }
+  ku_so: { title: "ئینجانە", subtitle: "پزیشکی ڕووەکەکانت", btn: "وێنە بگرە", loading: "خەریکی پشکنینە...", result: "ئەنجامی پشکنین", reset: "گەڕانەوە بۆ سەرەتا", adsTitle: "فرۆشیارانی گوڵ و نەمام", direction: 'rtl' },
+  ku_km: { title: "Injana", subtitle: "Bijîşkê riwekên te", btn: "Wêne bikişîne", loading: "Kontrol dike...", result: "Encama kontrolê", reset: "Vegere serê", adsTitle: "Firoşkarên Gulan", direction: 'rtl' },
+  ar: { title: "إنـجـانـة", subtitle: "طبيب نباتاتك الشخصي", btn: "التقط صورة", loading: "جاري الفحص...", result: "نتيجة الفحص", reset: "العودة للرئيسية", adsTitle: "بائعي الزهور", direction: 'rtl' },
+  en: { title: "Injana", subtitle: "Your Plant Doctor", btn: "Take a Photo", loading: "Analyzing...", result: "Result", reset: "Start Over", adsTitle: "Plant Stores", direction: 'ltr' }
 };
 
+// لۆگۆی گرافیکی ئینجانە (بۆ هێدەر)
 const InjanaLogo = () => (
   <div style={{ width: '80px', height: '80px', margin: '0 auto 10px' }}>
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -72,59 +73,37 @@ function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f0f7f0', direction: t.direction as any, fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-      <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f4f8f4', direction: t.direction as any, fontFamily: 'Arial, sans-serif', paddingBottom: '60px' }}>
+      
+      <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
         
-        {/* Language Switcher */}
+        {/* Language Selection */}
         {!preview && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px' }}>
             {Object.keys(translations).map((l) => (
-              <button key={l} onClick={() => setLang(l)} style={{ padding: '6px 12px', borderRadius: '20px', border: lang === l ? '2px solid #2e7d32' : '1px solid #ccc', background: 'white', cursor: 'pointer' }}>
+              <button key={l} onClick={() => setLang(l)} style={{ padding: '6px 14px', borderRadius: '20px', border: lang === l ? '2px solid #2e7d32' : '1px solid #ccc', background: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
                 {l === 'ku_so' ? 'سۆرانی' : l === 'ku_km' ? 'Kurmancî' : l === 'ar' ? 'عربي' : 'EN'}
               </button>
             ))}
           </div>
         )}
 
+        {/* Header */}
         <header style={{ textAlign: 'center', marginBottom: '30px' }}>
           <InjanaLogo />
-          <h1 style={{ color: '#1b5e20', fontSize: '2.8rem', margin: '0' }}>{t.title}</h1>
-          <p style={{ color: '#4caf50', fontWeight: 'bold' }}>{t.subtitle}</p>
+          <h1 style={{ color: '#1b5e20', fontSize: '2.8rem', margin: '0', fontWeight: 'bold' }}>{t.title}</h1>
+          <p style={{ color: '#4caf50', margin: '5px 0', fontSize: '1.1rem', fontWeight: 'bold' }}>{t.subtitle}</p>
         </header>
 
-        <div style={{ backgroundColor: 'white', borderRadius: '30px', padding: '25px', boxShadow: '0 10px 25px rgba(0,0,0,0.08)', textAlign: 'center' }}>
-          {preview && <img src={preview} alt="Plant" style={{ width: '100%', borderRadius: '20px', marginBottom: '20px' }} />}
+        {/* Main Card */}
+        <div style={{ backgroundColor: 'white', borderRadius: '35px', padding: '30px', boxShadow: '0 15px 35px rgba(0,0,0,0.06)', textAlign: 'center', marginBottom: '30px' }}>
+          {preview && <img src={preview} alt="Plant" style={{ width: '100%', borderRadius: '25px', marginBottom: '20px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }} />}
           
           {!result && (
             <>
               <input type="file" accept="image/*" onChange={handleImage} id="injana-upload" hidden />
-              <label htmlFor="injana-upload" style={{ backgroundColor: '#2e7d32', color: 'white', padding: '15px 30px', borderRadius: '50px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '12px', fontSize: '1.2rem', fontWeight: 'bold', width: '85%', justifyContent: 'center' }}>
-                {loading ? <Loader2 style={{ animation: 'spin 2s linear infinite' }} /> : <Camera />}
+              <label htmlFor="injana-upload" style={{ backgroundColor: '#2e7d32', color: 'white', padding: '18px 35px', borderRadius: '50px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '15px', fontSize: '1.3rem', fontWeight: 'bold', width: '90%', justifyContent: 'center' }}>
+                {loading ? <Loader2 style={{ animation: 'spin 2s linear infinite' }} size={28} /> : <Camera size={28} />}
                 {loading ? t.loading : t.btn}
               </label>
             </>
-          )}
-
-          {result && (
-            <button onClick={resetApp} style={{ backgroundColor: '#eee', color: '#333', padding: '10px 20px', borderRadius: '50px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
-              <Home size={18} /> {t.reset}
-            </button>
-          )}
-        </div>
-
-        {result && (
-          <div style={{ marginTop: '25px', backgroundColor: 'white', borderRadius: '25px', padding: '25px', borderRight: t.direction === 'rtl' ? '10px solid #2e7d32' : 'none', borderLeft: t.direction === 'ltr' ? '10px solid #2e7d32' : 'none', boxShadow: '0 5px 20px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>{t.result}:</h3>
-            <div style={{ lineHeight: '1.8', whiteSpace: 'pre-line', fontSize: '1.1rem' }}>{result}</div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(<App />);
-}
