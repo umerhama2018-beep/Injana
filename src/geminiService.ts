@@ -5,20 +5,21 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 
 export async function analyzePlantImage(base64Image: string, lang: string) {
   try {
-    // بەکارهێنانی ناوی مۆدێل بەبێ پاشگر
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // تاقیکردنەوەی مۆدێلی Pro کە زۆر جێگیرترە
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     
     const imageData = base64Image.includes(",") ? base64Image.split(",")[1] : base64Image;
 
     const result = await model.generateContent([
-      { text: "Identify this plant and its disease in one paragraph." },
+      { text: "Identify this plant and describe its health/disease in Kurdish Sorani." },
       { inlineData: { data: imageData, mimeType: "image/jpeg" } }
     ]);
     
     const response = await result.response;
     return response.text();
   } catch (error: any) {
-    // گۆڕینی دەقی هەڵەکە بۆ ئەوەی بزانین کۆدەکە نوێ بووەتەوە
-    return "هەڵەی وەشانی نوێ: " + (error.message || "404");
+    console.error(error);
+    // ئەگەر Pro کاری نەکرد، مۆدێلی Flash بە ناوێکی تر تاقی دەکەینەوە
+    return "هەڵەی سێرڤەر: " + (error.message || "404");
   }
 }
