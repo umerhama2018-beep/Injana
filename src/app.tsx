@@ -10,7 +10,6 @@ const translations: any = {
   en: { title: "Injana", subtitle: "Your Plant Doctor", btn: "Take a Photo", loading: "Analyzing...", result: "Result", reset: "Start Over", adsTitle: "Plant Stores", direction: 'ltr' }
 };
 
-// لۆگۆی گرافیکی ئینجانە (بۆ هێدەر)
 const InjanaLogo = () => (
   <div style={{ width: '80px', height: '80px', margin: '0 auto 10px' }}>
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -67,17 +66,14 @@ function App() {
       const response = await analyzePlantImage(resizedBase64, lang);
       setResult(response);
     } catch (err: any) {
-      setResult("Error: " + err.message);
+      setResult("هەڵەیەک ڕوویدا لە کاتی پەیوەندی بە ژیری دەستکرد: " + err.message);
     }
     setLoading(false);
   };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f4f8f4', direction: t.direction as any, fontFamily: 'Arial, sans-serif', paddingBottom: '60px' }}>
-      
       <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
-        
-        {/* Language Selection */}
         {!preview && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px' }}>
             {Object.keys(translations).map((l) => (
@@ -88,17 +84,14 @@ function App() {
           </div>
         )}
 
-        {/* Header */}
         <header style={{ textAlign: 'center', marginBottom: '30px' }}>
           <InjanaLogo />
           <h1 style={{ color: '#1b5e20', fontSize: '2.8rem', margin: '0', fontWeight: 'bold' }}>{t.title}</h1>
           <p style={{ color: '#4caf50', margin: '5px 0', fontSize: '1.1rem', fontWeight: 'bold' }}>{t.subtitle}</p>
         </header>
 
-        {/* Main Card */}
         <div style={{ backgroundColor: 'white', borderRadius: '35px', padding: '30px', boxShadow: '0 15px 35px rgba(0,0,0,0.06)', textAlign: 'center', marginBottom: '30px' }}>
           {preview && <img src={preview} alt="Plant" style={{ width: '100%', borderRadius: '25px', marginBottom: '20px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }} />}
-          
           {!result && (
             <>
               <input type="file" accept="image/*" onChange={handleImage} id="injana-upload" hidden />
@@ -107,3 +100,48 @@ function App() {
                 {loading ? t.loading : t.btn}
               </label>
             </>
+          )}
+          {result && (
+            <button onClick={resetApp} style={{ backgroundColor: '#f0f0f0', color: '#333', padding: '12px 25px', borderRadius: '50px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
+              <Home size={20} /> {t.reset}
+            </button>
+          )}
+        </div>
+
+        {result && (
+          <div style={{ backgroundColor: 'white', borderRadius: '30px', padding: '25px', borderRight: t.direction === 'rtl' ? '12px solid #2e7d32' : 'none', borderLeft: t.direction === 'ltr' ? '12px solid #2e7d32' : 'none', boxShadow: '0 8px 25px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
+            <h3 style={{ color: '#1b5e20', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Megaphone size={22} /> {t.result}:
+            </h3>
+            <div style={{ lineHeight: '1.9', whiteSpace: 'pre-line', fontSize: '1.15rem', color: '#333' }}>{result}</div>
+          </div>
+        )}
+
+        <div style={{ marginTop: '50px' }}>
+          <h3 style={{ textAlign: 'center', color: '#2e7d32', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <ShoppingBag size={20} /> {t.adsTitle}
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {[1, 2, 3].map((i) => (
+              <div key={i} style={{ background: 'white', padding: '10px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.04)', border: '1px solid #eee' }}>
+                <div style={{ height: '80px', background: '#f9f9f9', borderRadius: '15px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                   <img src="logo.png" alt="Ad" style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/100?text=Ad'; }} />
+                </div>
+                <p style={{ margin: '0', fontWeight: 'bold', fontSize: '0.8rem', color: '#666' }}>
+                  {lang === 'ku_so' ? 'فرۆشیار ' + i : 'Seller ' + i}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}
